@@ -13,5 +13,6 @@ namespace OneSTools.EventLog.Exporter.Core
         public int ReadingTimeout { get; set; } = 1;
         public bool LoadArchive { get; set; } = false;
         public DateTime SkipEventsBeforeDate { get; set; }
+        public string[] SkipEvents { get; set; }
     }
 }

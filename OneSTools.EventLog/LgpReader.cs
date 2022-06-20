@@ -2,6 +2,7 @@
 using System.Globalization;
 using System.IO;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading;
 using NodaTime;
 using OneSTools.BracketsFile;
@@ -16,14 +17,16 @@ namespace OneSTools.EventLog
         private FileStream _fileStream;
         private LgfReader _lgfReader;
         private FileSystemWatcher _lgpFileWatcher;
-        private DateTime _skipEventsBeforeDate;
+        private readonly DateTime _skipEventsBeforeDate;
+        private readonly string[] _skipEvents;
 
-        public LgpReader(string lgpPath, DateTimeZone timeZone, LgfReader lgfReader, DateTime skipEventsBeforeDate)
+        public LgpReader(string lgpPath, DateTimeZone timeZone, LgfReader lgfReader, DateTime skipEventsBeforeDate, string[] skipEvents)
         {
             LgpPath = lgpPath;
             _timeZone = timeZone;
             _lgfReader = lgfReader;
             _skipEventsBeforeDate = skipEventsBeforeDate;
+            _skipEvents = skipEvents;
         }
 
         public string LgpPath { get; }
@@ -87,7 +90,7 @@ namespace OneSTools.EventLog
 
         private EventLogItem ReadEventLogItemData(CancellationToken cancellationToken = default)
         {
-            while (true)
+            while (!cancellationToken.IsCancellationRequested)
             {
                 var (data, endPosition) = ReadNextEventLogItemData();
                 if (data.Length == 0)
@@ -97,6 +100,8 @@ namespace OneSTools.EventLog
                 if (eventLogItem != null)
                     return eventLogItem;
             }
+
+            return null;
         }
 
         private EventLogItem ParseEventLogItemData(StringBuilder eventLogItemData, long endPosition,
@@ -104,7 +109,7 @@ namespace OneSTools.EventLog
         {
             var parsedData = BracketsParser.ParseBlock(eventLogItemData);
 
-            DateTime dateTime = default;
+            DateTime dateTime;
             try
             {
                 dateTime = _timeZone.ToUtc(DateTime.ParseExact(parsedData[0], "yyyyMMddHHmmss",
@@ -118,13 +123,21 @@ namespace OneSTools.EventLog
             if (dateTime < _skipEventsBeforeDate)
                 return null;
 
+            var rawEvent = _lgfReader.GetObjectValue(ObjectType.Events, parsedData[7], cancellationToken);
+            var eventPresentation = GetEventPresentation(rawEvent);
+            
+            foreach(var eventToBeSkipped in _skipEvents)
+                if (Regex.Match(eventPresentation, eventToBeSkipped).Success)
+                    return null;
+
             var eventLogItem = new EventLogItem
             {
                 DateTime = dateTime,
                 TransactionStatus = GetTransactionPresentation(parsedData[1]),
                 FileName = LgpFileName,
                 EndPosition = endPosition,
-                LgfEndPosition = _lgfReader.GetPosition()
+                LgfEndPosition = _lgfReader.GetPosition(),
+                Event = eventPresentation
             };
 
             var transactionData = parsedData[2];
@@ -145,9 +158,6 @@ namespace OneSTools.EventLog
             eventLogItem.Application = GetApplicationPresentation(application);
 
             eventLogItem.Connection = parsedData[6];
-
-            var ev = _lgfReader.GetObjectValue(ObjectType.Events, parsedData[7], cancellationToken);
-            eventLogItem.Event = GetEventPresentation(ev);
 
             var severity = (string)parsedData[8];
             eventLogItem.Severity = GetSeverityPresentation(severity);
