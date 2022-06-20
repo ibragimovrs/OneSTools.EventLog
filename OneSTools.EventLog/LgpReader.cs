@@ -162,7 +162,7 @@ namespace OneSTools.EventLog
             var severity = (string)parsedData[8];
             eventLogItem.Severity = GetSeverityPresentation(severity);
 
-            eventLogItem.Comment = parsedData[9];
+            eventLogItem.Comment = parsedData[9].ToString().Replace("\"\"", "\"");
 
             (value, uuid) = _lgfReader.GetReferencedObjectValue(ObjectType.Metadata, parsedData[10], cancellationToken);
             eventLogItem.MetadataUuid = uuid;
