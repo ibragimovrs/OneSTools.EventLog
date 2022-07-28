@@ -167,6 +167,7 @@ namespace OneSTools.EventLog.Exporter.Manager
 
                         var settings = new EventLogExporterSettings
                         {
+                            DBName = name,
                             LogFolder = logFolder,
                             CollectedFactor = _collectedFactor,
                             LoadArchive = _loadArchive,
@@ -184,7 +185,7 @@ namespace OneSTools.EventLog.Exporter.Manager
                             {
                                 try
                                 {
-                                    using var storage = GetStorage(dataBaseName);
+                                    using var storage = GetStorage(dataBaseName, name);
                                     using var exporter = new EventLogExporter(settings, storage, logger);
                                     await exporter.StartAsync(cts.Token);
                                 }
@@ -224,7 +225,7 @@ namespace OneSTools.EventLog.Exporter.Manager
             }
         }
 
-        private IEventLogStorage GetStorage(string dataBaseName)
+        private IEventLogStorage GetStorage(string dataBaseName, string dbName)
         {
             switch (_storageType)
             {
@@ -234,7 +235,7 @@ namespace OneSTools.EventLog.Exporter.Manager
                             (ILogger<ClickHouseStorage>)_serviceProvider.GetService(typeof(ILogger<ClickHouseStorage>));
                         var connectionString = $"{_connectionString}Database={dataBaseName};";
 
-                        return new ClickHouseStorage(connectionString, logger);
+                        return new ClickHouseStorage(connectionString, dbName, logger);
                     }
                 case StorageType.ElasticSearch:
                     {

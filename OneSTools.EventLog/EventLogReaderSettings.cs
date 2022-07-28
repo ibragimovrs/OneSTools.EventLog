@@ -6,6 +6,7 @@ namespace OneSTools.EventLog
 {
     public class EventLogReaderSettings
     {
+        public string DBName { get; set; } = "";
         public string LogFolder { get; set; } = "";
         public bool LiveMode { get; set; } = true;
         public string LgpFileName { get; set; } = "";

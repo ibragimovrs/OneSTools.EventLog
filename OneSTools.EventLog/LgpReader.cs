@@ -19,14 +19,16 @@ namespace OneSTools.EventLog
         private FileSystemWatcher _lgpFileWatcher;
         private readonly DateTime _skipEventsBeforeDate;
         private readonly string[] _skipEvents;
+        private readonly string DataBaseName;
 
-        public LgpReader(string lgpPath, DateTimeZone timeZone, LgfReader lgfReader, DateTime skipEventsBeforeDate, string[] skipEvents)
+        public LgpReader(string lgpPath, DateTimeZone timeZone, LgfReader lgfReader, DateTime skipEventsBeforeDate, string[] skipEvents, string infoBaseName)
         {
             LgpPath = lgpPath;
             _timeZone = timeZone;
             _lgfReader = lgfReader;
             _skipEventsBeforeDate = skipEventsBeforeDate;
             _skipEvents = skipEvents;
+            DataBaseName = infoBaseName;
         }
 
         public string LgpPath { get; }
@@ -181,6 +183,7 @@ namespace OneSTools.EventLog
                 eventLogItem.AddPort = int.Parse(addPort);
 
             eventLogItem.Session = parsedData[16];
+            eventLogItem.DataBaseName = DataBaseName;
 
             return eventLogItem;
         }

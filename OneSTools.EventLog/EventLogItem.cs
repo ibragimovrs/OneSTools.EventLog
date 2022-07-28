@@ -6,6 +6,7 @@ namespace OneSTools.EventLog
     {
         public long Id { get; set; } = 0;
         public virtual string FileName { get; set; } = "";
+        public virtual string DataBaseName { get; set; } = "";
         public virtual long EndPosition { get; set; } = 0;
         public virtual long LgfEndPosition { get; set; } = 0;
         public virtual DateTime DateTime { get; set; } = DateTime.MinValue;

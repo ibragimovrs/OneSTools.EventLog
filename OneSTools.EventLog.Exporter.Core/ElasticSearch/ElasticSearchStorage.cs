@@ -207,6 +207,7 @@ namespace OneSTools.EventLog.Exporter.Core.ElasticSearch
                         ""mappings"": {
                             ""properties"": {
                                 ""fileName"": { ""type"": ""keyword"" },
+                                ""dataBaseName"": { ""type"": ""keyword"" },
                                 ""endPosition"": { ""type"": ""long"" },
                                 ""lgfEndPosition"": { ""type"": ""long"" },
                                 ""Id"": { ""type"": ""long"" },

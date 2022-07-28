@@ -29,7 +29,7 @@ namespace OneSTools.EventLog
             {
                 var file = Path.Combine(_settings.LogFolder, settings.LgpFileName);
 
-                _lgpReader = new LgpReader(file, settings.TimeZone, _lgfReader, settings.SkipEventsBeforeDate, settings.SkipEvents);
+                _lgpReader = new LgpReader(file, settings.TimeZone, _lgfReader, settings.SkipEventsBeforeDate, settings.SkipEvents, settings.DBName);
                 _lgpReader.SetPosition(settings.LgpStartPosition);
             }
         }
@@ -148,7 +148,7 @@ namespace OneSTools.EventLog
             _lgpReader?.Dispose();
             _lgpReader = null;
 
-            _lgpReader = new LgpReader(item1, _settings.TimeZone, _lgfReader, _settings.SkipEventsBeforeDate, _settings.SkipEvents);
+            _lgpReader = new LgpReader(item1, _settings.TimeZone, _lgfReader, _settings.SkipEventsBeforeDate, _settings.SkipEvents, _settings.DBName);
 
             return true;
         }

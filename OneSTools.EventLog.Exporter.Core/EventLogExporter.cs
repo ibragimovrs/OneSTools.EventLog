@@ -26,6 +26,7 @@ namespace OneSTools.EventLog.Exporter.Core
         private BatchBlock<EventLogItem> _batchBlock;
         private readonly DateTime _skipEventsBeforeDate;
         private readonly string[] _skipEvents;
+        private readonly string _dataBaseName;
 
         private string _currentLgpFile;
 
@@ -50,6 +51,7 @@ namespace OneSTools.EventLog.Exporter.Core
             _readingTimeout = settings.ReadingTimeout;
             _skipEventsBeforeDate = settings.SkipEventsBeforeDate;
             _skipEvents = settings.SkipEvents;
+            _dataBaseName = settings.DBName;
 
             CheckSettings();
         }
@@ -201,7 +203,8 @@ namespace OneSTools.EventLog.Exporter.Core
                 ReadingTimeout = _readingTimeout * 1000,
                 TimeZone = _timeZone,
                 SkipEventsBeforeDate = _skipEventsBeforeDate,
-                SkipEvents = _skipEvents
+                SkipEvents = _skipEvents,
+                DBName = _dataBaseName
             };
 
             if (!_loadArchive)

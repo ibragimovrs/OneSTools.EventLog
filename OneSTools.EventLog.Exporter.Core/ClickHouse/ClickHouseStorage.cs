@@ -18,11 +18,13 @@ namespace OneSTools.EventLog.Exporter.Core.ClickHouse
         private ClickHouseConnection _connection;
         private string _connectionString;
         private string _databaseName;
+        private string _dbName;
 
-        public ClickHouseStorage(string connectionsString, ILogger<ClickHouseStorage> logger = null)
+        public ClickHouseStorage(string connectionsString, string dbName, ILogger<ClickHouseStorage> logger = null)
         {
             _logger = logger;
             _connectionString = connectionsString;
+            _dbName = dbName;
 
             Init();
         }
@@ -31,6 +33,7 @@ namespace OneSTools.EventLog.Exporter.Core.ClickHouse
         {
             _logger = logger;
             _connectionString = configuration.GetValue("ClickHouse:ConnectionString", "");
+            _dbName = configuration.GetValue("ClickHouse:dbName", "");
 
             Init();
         }
@@ -40,7 +43,7 @@ namespace OneSTools.EventLog.Exporter.Core.ClickHouse
             await CreateConnectionAsync(cancellationToken);
 
             var commandText =
-                $"SELECT TOP 1 FileName, EndPosition, LgfEndPosition, Id FROM {TableName} ORDER BY Id DESC";
+                  $"SELECT TOP 1 FileName, EndPosition, LgfEndPosition, Id FROM {TableName} WHERE DataBaseName = '{_dbName}' ORDER BY Id DESC";
 
             await using var cmd = _connection.CreateCommand();
             cmd.CommandText = commandText;
@@ -89,7 +92,8 @@ namespace OneSTools.EventLog.Exporter.Core.ClickHouse
                 item.Server ?? "",
                 item.MainPort,
                 item.AddPort,
-                item.Session
+                item.Session,
+                item.DataBaseName ?? ""
             }).AsEnumerable();
 
             try
@@ -174,7 +178,8 @@ namespace OneSTools.EventLog.Exporter.Core.ClickHouse
                     Server LowCardinality(String),
                     MainPort Int32 Codec(DoubleDelta, LZ4),
                     AddPort Int32 Codec(DoubleDelta, LZ4),
-                    Session Int64 Codec(DoubleDelta, LZ4)
+                    Session Int64 Codec(DoubleDelta, LZ4),
+                    DataBaseName LowCardinality(String)
                 )
                 engine = MergeTree()
                 PARTITION BY (toYYYYMM(DateTime))
