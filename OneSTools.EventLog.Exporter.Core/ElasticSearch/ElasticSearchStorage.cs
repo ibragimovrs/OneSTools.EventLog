@@ -199,7 +199,7 @@ namespace OneSTools.EventLog.Exporter.Core.ElasticSearch
 
             var cmd =
                 @"{
-                    ""index_patterns"": ""*-el-*"",
+                    ""index_patterns"": ""v8logs*"",
                     ""template"": {
                         ""settings"": {
                             ""index.codec"": ""best_compression""
