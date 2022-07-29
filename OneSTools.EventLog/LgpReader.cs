@@ -19,15 +19,17 @@ namespace OneSTools.EventLog
         private FileSystemWatcher _lgpFileWatcher;
         private readonly DateTime _skipEventsBeforeDate;
         private readonly string[] _skipEvents;
+        private readonly string[] _certainEvents;
         private readonly string DataBaseName;
 
-        public LgpReader(string lgpPath, DateTimeZone timeZone, LgfReader lgfReader, DateTime skipEventsBeforeDate, string[] skipEvents, string infoBaseName)
+        public LgpReader(string lgpPath, DateTimeZone timeZone, LgfReader lgfReader, DateTime skipEventsBeforeDate, string[] skipEvents, string[] certainEvents, string infoBaseName)
         {
             LgpPath = lgpPath;
             _timeZone = timeZone;
             _lgfReader = lgfReader;
             _skipEventsBeforeDate = skipEventsBeforeDate;
             _skipEvents = skipEvents;
+            _certainEvents = certainEvents;
             DataBaseName = infoBaseName;
         }
 
@@ -127,10 +129,20 @@ namespace OneSTools.EventLog
 
             var rawEvent = _lgfReader.GetObjectValue(ObjectType.Events, parsedData[7], cancellationToken);
             var eventPresentation = GetEventPresentation(rawEvent);
-            
-            foreach(var eventToBeSkipped in _skipEvents)
-                if (Regex.Match(eventPresentation, eventToBeSkipped).Success)
-                    return null;
+
+            if (_certainEvents.Length > 0)
+            {
+                foreach (var eventToAdd in _certainEvents)
+                    if (Regex.Match(eventPresentation, eventToAdd).Success != true)
+                        return null;
+            }
+            else if (_skipEvents.Length > 0)
+            {
+                foreach (var eventToBeSkipped in _skipEvents)
+                    if (Regex.Match(eventPresentation, eventToBeSkipped).Success)
+                        return null;
+            }
+
 
             var eventLogItem = new EventLogItem
             {

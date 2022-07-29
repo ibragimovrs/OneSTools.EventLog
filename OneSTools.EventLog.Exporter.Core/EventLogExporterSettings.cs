@@ -15,5 +15,6 @@ namespace OneSTools.EventLog.Exporter.Core
         public bool LoadArchive { get; set; } = false;
         public DateTime SkipEventsBeforeDate { get; set; }
         public string[] SkipEvents { get; set; }
+        public string[] CertainEvents { get; set; }
     }
 }

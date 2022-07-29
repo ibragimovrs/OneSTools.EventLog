@@ -17,5 +17,6 @@ namespace OneSTools.EventLog
         public DateTimeZone TimeZone { get; set; } = DateTimeZoneProviders.Tzdb.GetSystemDefault();
         public DateTime SkipEventsBeforeDate { get; set; }
         public string[] SkipEvents { get; set; }
+        public string[] CertainEvents { get; set; }
     }
 }
