@@ -189,7 +189,7 @@ namespace OneSTools.EventLog.Exporter.Core.ElasticSearch
             var indexTemplateName = "oneslogs";
 
             var getItResponse = await _client.LowLevel.DoRequestAsync<StringResponse>(HttpMethod.GET,
-                $"_index_template/{indexTemplateName}", cancellationToken);
+                $"_template/{indexTemplateName}", cancellationToken);
 
             // if it exists then skip creating
             if (!getItResponse.Success)
@@ -199,14 +199,14 @@ namespace OneSTools.EventLog.Exporter.Core.ElasticSearch
 
             var cmd =
                 @"{
-                    ""index_patterns"": ""*-el-*"",
-                    ""template"": {
+                    ""index_patterns"": ""v8logs*"",
                         ""settings"": {
                             ""index.codec"": ""best_compression""
                         },
                         ""mappings"": {
                             ""properties"": {
                                 ""fileName"": { ""type"": ""keyword"" },
+                                ""dataBaseName"": { ""type"": ""keyword"" },
                                 ""endPosition"": { ""type"": ""long"" },
                                 ""lgfEndPosition"": { ""type"": ""long"" },
                                 ""Id"": { ""type"": ""long"" },
@@ -231,12 +231,11 @@ namespace OneSTools.EventLog.Exporter.Core.ElasticSearch
                                 ""dataPresentation"": { ""type"": ""text"" },
                                 ""user"": { ""type"": ""keyword"" }
                             }
-                        }
                     }
                 }";
 
             var response = await _client.LowLevel.DoRequestAsync<StringResponse>(HttpMethod.PUT,
-                $"_index_template/{indexTemplateName}", cancellationToken, PostData.String(cmd));
+                $"_template/{indexTemplateName}", cancellationToken, PostData.String(cmd));
 
             if (!response.Success)
                 throw response.OriginalException;
